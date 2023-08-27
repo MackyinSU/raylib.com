@@ -1,7 +1,7 @@
 
     //窗口相关功能
     void InitWindow(int width, int height, const char *title);  //初始化窗口和OpenGL上下文
-    bool WindowShouldClose(void);                               //检查是否按下了KEY_ESCAPE或关闭图标
+    bool WindowShouldClose(void);                               //检查是否按下了KEY_ESCAPE（esc键）或关闭图标
     void CloseWindow(void);                                     //关闭窗口并卸载OpenGL上下文
     bool IsWindowReady(void);                                   //检查窗口是否已成功初始化
     bool IsWindowFullscreen(void);                              //检查窗口当前是否为全屏
@@ -48,7 +48,7 @@
     //自定义框架控制功能
     //注：这些功能适用于希望完全控制帧处理的高级用户
     //默认情况下, EndDrawing()完成以下任务：绘制所有内容+SwapScreenBuffer()+管理帧计时+PollInputEvents()
-    //要避免这种行为并手动控制帧进程, 请在配置中启用。h：支持自定义框架控制
+    //要避免这种行为并手动控制帧进程, 请在config.h中启用: SUPPORT_CUSTOM_FRAME_CONTROL
     void SwapScreenBuffer(void);                                //用前缓冲区交换后缓冲区(屏幕绘图)
     void PollInputEvents(void);                                 //注册所有输入事件
     void WaitTime(double 双秒);                                  //等待一段时间(停止程序执行)
@@ -73,7 +73,7 @@
     void EndTextureMode(void);                                  //结束绘制以渲染Texture
     void BeginShaderMode(Shader shader);                        //开始自定义着色器绘图
     void EndShaderMode(void);                                   //结束自定义着色器绘图(使用默认着色器)
-    void BeginBlendMode(int模式);                                //开始混合模式(alpha, 加法, 乘法, 减法, 自定义)
+    void BeginBlendMode(int mode);                                //开始混合模式(alpha, 加法, 乘法, 减法, 自定义模式)
     void EndBlendMode(void);                                    //结束混合模式(重置为默认值：alpha混合)
     void BeginScissorMode(int x, int y, int width, int height); //开始剪式模式(定义下图的屏幕区域)
     void EndScissorMode(void);                                  //末端剪式模式
@@ -97,13 +97,13 @@
     void UnloadShader(Shader shader);   //从GPU内存(VRAM)卸载着色器
     
     //屏幕空间相关功能
-    Ray GetMouseRay(Vector2 mousePosition, Camera 相机);        //从鼠标位置获取光线跟踪
+    Ray GetMouseRay(Vector2 mousePosition, Camera camera);        //从鼠标位置获取光线跟踪
     Matrix GetCameraMatrix(Camera camera);                     //获取相机变换矩阵(视图矩阵)
-    Matrix GetCameraMatrix2D(Camera2D相机);                     //获取相机二维变换矩阵
-    Vector2 GetWorldToScreen(Vector3位置, 摄像机);               //获取三维世界空间位置的屏幕空间位置
-    Vector2 GetScreenToWorld2D(Vector2位置, Camera2D相机);       //获取2d相机屏幕空间位置的世界空间位置
-    Vector2 GetWorldToScreenEx(Vector3位置, 摄像机, int宽度, int高度); //获取三维世界空间位置的大小位置
-    Vector2 GetWorldToScreen2D(Vector2位置, Camera2D相机);       //获取2d相机世界空间位置的屏幕空间位置
+    Matrix GetCameraMatrix2D(Camera2D camera);                     //获取相机二维变换矩阵
+    Vector2 GetWorldToScreen(Vector3 位置/*position*/, Camera camera);               //获取三维世界空间位置的屏幕空间位置
+    Vector2 GetScreenToWorld2D(Vector2 位置, Camera2D camera);       //获取2d相机屏幕空间位置的世界空间位置
+    Vector2 GetWorldToScreenEx(Vector3 位置, Camera camera, int 宽度, int 高度); //获取三维世界空间位置的大小位置
+    Vector2 GetWorldToScreen2D(Vector2 位置, Camera2D camera);       //获取2d相机世界空间位置的屏幕空间位置
     
     //定时相关功能
     void SetTargetFPS(int fps);//设置目标FPS(最大值)
@@ -170,9 +170,9 @@
     //输入处理功能(模块：核心)
     //------------------------------------------------------------------------------------
     
-    //输入相关功能：键盘
-    bool IsKeyPressed(int键);                                //检查是否按下了一次键
-    bool IsKeyDown(int键);                                   //检查是否按下了键
+    //输入相关功能：键盘（int key参数应填入raylib自带的预制按键，比如侦测是否按下a的话，就应该填入KEY_A）
+    bool IsKeyPressed(int key);                                //检查是否按下了一次键
+    bool IsKeyDown(int key);                                   //检查是否按下了键
     bool IsKeyReleased(int key);                            //检查按键是否已释放一次
     bool IsKeyUp(int key);                                  //检查是否未按下按键
     void SetExitKey(int key);                               //设置自定义键以退出程序(默认为ESC)
@@ -218,21 +218,16 @@
     //手势和触摸处理功能(模块：手势)
     //------------------------------------------------------------------------------------
     void SetGesturesEnabled(unsigned int flag);            //使用标志启用一组手势
-    bool IsGestureDetected(int手势);                        //检查是否检测到手势
+    bool IsGestureDetected(int gesture);                        //检查是否检测到手势
     int GetGestureDetected(void);                          //获取最新检测到的手势
     float GetGestureHoldDuration(void);                    //获取手势保持时间(毫秒)
     Vector2 GetGestureDragVector(void);                    //获取手势拖动矢量
     float GetGestureDragAngle(void);                       //获取手势拖动角度
     Vector2 GetGesturePinchVector(void);                   //获取手势捏三角
     float GetGesturePinchAngle(void);                      //获取手势捏角
-    
     //------------------------------------------------------------------------------------
-    //摄像头系统功能(模块：rcamera)
+    //摄像头系统功能（模块：rcamera）
     //------------------------------------------------------------------------------------
-    void SetCameraMode(Camera camera, int mode);           //设置相机模式(多种相机模式可用)
-    void UpdateCamera(Camera*camera);                      //更新所选模式的相机位置
-    void SetCameraPanControl(int keyPan);                  //设置相机平移键以与鼠标移动相结合(自由相机)
-    void SetCameraAltControl(int keyAlt);                  //设置相机alt键以与鼠标移动相结合(自由相机)
-    void SetCameraSmoothZoomControl(int keySmoothZoom);    //设置相机平滑缩放键以与鼠标结合(自由相机)
-    void SetCameraMoveControls(int keyFront, int keyBack, int keyRight, int keyLeft, int key Up, int keyDown); //设置摄像机移动控制(第一人称和第三人称摄像机)
+    void UpdateCamera(Camera*Camera，int mode);//更新所选模式的相机位置,mode参数需要填入一个raylib自带的预制摄像机模式，这会让使用摄像机变得更加方便
+    void UpdateCameraPro(Camera* camera，Vector3 movement，Vector2 rotation/*旋转*/，float zoom/*缩放大小*/)//更新相机移动/旋转
     
